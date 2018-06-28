@@ -113,7 +113,7 @@ static intr_filter_t atkbdc_intr(void *data) {
   return IF_FILTERED;
 }
 
-static int __attribute__((optimize("O0"))) atkbdc_probe(device_t *dev) {
+static int atkbdc_probe(device_t *dev) {
   assert(dev->parent->bus == DEV_BUS_PCI);
 
   /* TODO: Implement resource deallocation in rman.
