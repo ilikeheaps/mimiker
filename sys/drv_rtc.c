@@ -91,8 +91,9 @@ static int rtc_attach(device_t *dev) {
 
   rtc_state_t *rtc = dev->state;
 
-  rtc->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_RTC + ISA_BEGIN,
-                                 ISA_BEGIN + IO_RTC + IO_RTCSIZE - 1, IO_RTCSIZE, 0);
+  rtc->regs =
+    bus_resource_alloc(dev, RT_ISA, 0, IO_RTC + ISA_BEGIN,
+                       ISA_BEGIN + IO_RTC + IO_RTCSIZE - 1, IO_RTCSIZE, 0);
   assert(rtc->regs != NULL);
 
   rtc->intr_handler =

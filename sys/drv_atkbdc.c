@@ -118,10 +118,11 @@ static int __attribute__((optimize("O0"))) atkbdc_probe(device_t *dev) {
 
   /* TODO: Implement resource deallocation in rman.
    * When probe is not successful, driver should release claimed resources. */
-  resource_t *regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD + ISA_BEGIN,
-                                        ISA_BEGIN + IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
-  
-  if(regs == NULL)
+  resource_t *regs =
+    bus_resource_alloc(dev, RT_ISA, 0, IO_KBD + ISA_BEGIN,
+                       ISA_BEGIN + IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
+
+  if (regs == NULL)
     return 0;
 
   if (!kbd_reset(regs)) {
@@ -157,14 +158,14 @@ static int atkbdc_attach(device_t *dev) {
   mtx_init(&atkbdc->mtx, MTX_DEF);
   cv_init(&atkbdc->nonempty, "AT keyboard buffer non-empty");
 
-  #if 0
+#if 0
   /* Gets the same resource for the 2nd time. Previously it was taken in atkbdc_probe.
    * It was not deallocated then, and that makes this request fail because we also
    * cannot share resource at the moment. */
   atkbdc->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD + ISA_BEGIN,
                                     ISA_BEGIN + IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
-  #endif
-  
+#endif
+
   /* HACK to pass allocated resource from atkbdc_probe */
   atkbdc->regs = dev->instance;
 
