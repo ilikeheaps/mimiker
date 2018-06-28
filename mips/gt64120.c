@@ -257,6 +257,9 @@ static int gt_pci_attach(device_t *pcib) {
   gtpci->isa_io = bus_resource_alloc(pcib, RT_MEMORY, 0, MALTA_PCI0_IO_BASE,
                                      MALTA_PCI0_IO_BASE + 0xfff, 0x1000, 0);
 
+  /* All resources returned from rootdev are of type RT_MEMORY, so
+   * pci_io_memspace and isa_iospace rmans are also managing resources of type 
+   * RT_MEMORY.  */
   if (gtpci->corectrl == NULL || gtpci->pci_mem == NULL ||
       gtpci->pci_io == NULL || gtpci->isa_io == NULL) {
     panic("gt64120 resource allocation fail");

@@ -23,6 +23,8 @@ typedef struct pit_state {
 #define inb(addr) bus_space_read_1(pit->regs, IO_TIMER1 + (addr))
 #define outb(addr, val) bus_space_write_1(pit->regs, IO_TIMER1 + (addr), (val))
 
+#define ISA_BEGIN 0x18000000
+
 static void pit_set_frequency(pit_state_t *pit, uint16_t period) {
   assert(spin_owned(&pit->lock));
 
@@ -111,8 +113,8 @@ static int pit_attach(device_t *dev) {
 
   pit_state_t *pit = dev->state;
 
-  pit->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_TIMER1,
-                                 IO_TIMER1 + IO_TMRSIZE - 1, IO_TMRSIZE, 0);
+  pit->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_TIMER1 + ISA_BEGIN,
+                                 ISA_BEGIN + IO_TIMER1 + IO_TMRSIZE - 1, IO_TMRSIZE, 0);
   assert(pit->regs != NULL);
 
   pit->lock = SPINLOCK_INITIALIZER();

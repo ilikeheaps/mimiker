@@ -13,6 +13,7 @@
 #include <sysinit.h>
 
 #define KBD_BUFSIZE 128
+#define ISA_BEGIN 0x18000000
 
 typedef struct atkbdc_state {
   mtx_t mtx;
@@ -112,14 +113,16 @@ static intr_filter_t atkbdc_intr(void *data) {
   return IF_FILTERED;
 }
 
-static int atkbdc_probe(device_t *dev) {
+static int __attribute__((optimize("O0"))) atkbdc_probe(device_t *dev) {
   assert(dev->parent->bus == DEV_BUS_PCI);
 
   /* TODO: Implement resource deallocation in rman.
    * When probe is not successful, driver should release claimed resources. */
-  resource_t *regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD,
-                                        IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
-  assert(regs != NULL);
+  resource_t *regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD + ISA_BEGIN,
+                                        ISA_BEGIN + IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
+  
+  if(regs == NULL)
+    return 0;
 
   if (!kbd_reset(regs)) {
     klog("Keyboard self-test failed.");
@@ -137,6 +140,9 @@ static int atkbdc_probe(device_t *dev) {
   if (read_data(regs) != KBD_ACK)
     return 0;
 
+  /* HACK to pass allocated resource to atkbdc_attach. */
+  dev->instance = regs;
+
   return 1;
 }
 
@@ -150,8 +156,18 @@ static int atkbdc_attach(device_t *dev) {
 
   mtx_init(&atkbdc->mtx, MTX_DEF);
   cv_init(&atkbdc->nonempty, "AT keyboard buffer non-empty");
-  atkbdc->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD,
-                                    IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
+
+  #if 0
+  /* Gets the same resource for the 2nd time. Previously it was taken in atkbdc_probe.
+   * It was not deallocated then, and that makes this request fail because we also
+   * cannot share resource at the moment. */
+  atkbdc->regs = bus_resource_alloc(dev, RT_ISA, 0, IO_KBD + ISA_BEGIN,
+                                    ISA_BEGIN + IO_KBD + IO_KBDSIZE - 1, IO_KBDSIZE, 0);
+  #endif
+  
+  /* HACK to pass allocated resource from atkbdc_probe */
+  atkbdc->regs = dev->instance;
+
   assert(atkbdc->regs != NULL);
 
   atkbdc->intr_handler =
