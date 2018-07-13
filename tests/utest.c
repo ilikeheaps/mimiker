@@ -70,7 +70,7 @@ UTEST_ADD_SIMPLE(fd_open_path);
 UTEST_ADD_SIMPLE(fd_dup);
 UTEST_ADD_SIMPLE(fd_all);
 
-/* XXX UTEST_ADD_SIMPLE(signal_basic); */
+UTEST_ADD_SIMPLE(signal_basic);
 /* XXX UTEST_ADD_SIMPLE(signal_send); */
 /* XXX UTEST_ADD_SIGNAL(signal_abort, SIGABRT); */
 /* XXX UTEST_ADD_SIGNAL(signal_segfault, SIGSEGV); */
